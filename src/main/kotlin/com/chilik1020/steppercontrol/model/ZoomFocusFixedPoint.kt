@@ -13,7 +13,7 @@ import tornadofx.*
 ////    fun focusProperty() = getProperty(ZoomFocusFixedPoint::focus)
 //}
 
-data class ZoomFocusFixedPoint(val id: Int, val zoom: Int, val focus: Int) {
+data class ZoomFocusFixedPoint(val id: Int, val zoom: Int, val focusForward: Int, val focusBack: Int) {
 //    var id by property(id)
     // fun idProperty() = getProperty(ZoomFocusFixedPoint::id)
 

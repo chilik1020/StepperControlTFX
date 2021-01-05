@@ -111,36 +111,36 @@ class StepperControlView : View("Zoom/Focus control") {
             row {
                 label {
                     addClass(Styles.labelH1)
-                    text = "№"
+                    text = "Zoom"
                 }
 
                 label {
                     addClass(Styles.labelH1)
-                    text = "Zoom"
+                    text = "Focus ->"
                 }
                 label {
                     addClass(Styles.labelH1)
-                    text = "Focus"
+                    text = "Focus <-"
                 }
             }
 
             row {
-                textfield(viewModel.pointNumber) {
-                    tooltip("Номер точки")
-                    addClass(Styles.textFieldStep)
-                    promptText = "Номер точки"
-                }
-
                 textfield(viewModel.pointZoom) {
-                    tooltip("Значение Zoom")
+                    tooltip("Zoom")
                     addClass(Styles.textFieldStep)
-                    promptText = "Значение Zoom"
+                    promptText = "Zoom"
                 }
 
-                textfield(viewModel.pointFocus) {
-                    tooltip("Значение Focus")
+                textfield(viewModel.pointFocusForward) {
+                    tooltip("Focus forward")
                     addClass(Styles.textFieldStep)
-                    promptText = "Значение Focus"
+                    promptText = "Focus forward"
+                }
+
+                textfield(viewModel.pointFocusBack) {
+                    tooltip("Focus back")
+                    addClass(Styles.textFieldStep)
+                    promptText = "Focus back"
                 }
 
                 hbox {
@@ -163,6 +163,17 @@ class StepperControlView : View("Zoom/Focus control") {
                     }
                 }
             }
+
+            row {
+                button {
+                    addClass(Styles.controlButton)
+                    tooltip("Test")
+                    text = "Test"
+                    action {
+                        viewModel.onClickTest()
+                    }
+                }
+            }
         }
 
         val updateItems = MenuItem("Update")
@@ -174,7 +185,8 @@ class StepperControlView : View("Zoom/Focus control") {
             tooltip("Правой кнопкой жми")
             readonlyColumn("№",ZoomFocusFixedPoint::id)
             readonlyColumn("Zoom", ZoomFocusFixedPoint::zoom)
-            readonlyColumn("Focus", ZoomFocusFixedPoint::focus)
+            readonlyColumn("Focus Forward", ZoomFocusFixedPoint::focusForward)
+            readonlyColumn("Focus Back", ZoomFocusFixedPoint::focusBack)
         }.contextMenu = ContextMenu(updateItems)
     }
 }

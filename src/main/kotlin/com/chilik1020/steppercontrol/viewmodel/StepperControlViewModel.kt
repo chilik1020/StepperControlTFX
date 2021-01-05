@@ -8,7 +8,11 @@ import com.chilik1020.steppercontrol.utils.CMD1_FIXED_POINTS_ANSWER
 import com.chilik1020.steppercontrol.utils.getPacketByteByCmd1
 import javafx.beans.property.*
 import javafx.collections.FXCollections
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import tornadofx.*
+import kotlin.random.Random
 
 class StepperControlViewModel : ViewModel() {
 
@@ -17,12 +21,14 @@ class StepperControlViewModel : ViewModel() {
 
     var portOpened = SimpleBooleanProperty(false)
 
+    var testRunning = SimpleBooleanProperty(false)
+
     val stepsZoom : IntegerProperty = SimpleIntegerProperty(1)
     val stepsFocus : IntegerProperty = SimpleIntegerProperty(1)
 
-    val pointNumber : IntegerProperty = SimpleIntegerProperty(1)
     val pointZoom : IntegerProperty = SimpleIntegerProperty(0)
-    val pointFocus : IntegerProperty = SimpleIntegerProperty(0)
+    val pointFocusForward : IntegerProperty = SimpleIntegerProperty(0)
+    val pointFocusBack : IntegerProperty = SimpleIntegerProperty(0)
 
     var fixedPoints : ListProperty<ZoomFocusFixedPoint> = SimpleListProperty<ZoomFocusFixedPoint>(FXCollections.observableArrayList())
 
@@ -47,6 +53,7 @@ class StepperControlViewModel : ViewModel() {
     }
 
     fun onClick(cmd: Command) {
+
         when(cmd) {
             Command.Init -> sendInitCommand(cmd)
             Command.ZoomPlus -> sendZoomCommand(cmd)
@@ -61,14 +68,34 @@ class StepperControlViewModel : ViewModel() {
         }
     }
 
+    fun onClickTest() {
+        testRunning.value = !testRunning.value
+        runAsync {
+            var steps = 0
+            while (testRunning.value) {
+                steps = Random.nextInt(1,39)
+                for(i in 0..steps) {
+                    sendChangePoint(Command.NextPoint)
+                    Thread.sleep(300)
+                }
+                steps = Random.nextInt(1,39)
+                for(i in 0..steps) {
+                    sendChangePoint(Command.PreviousPoint)
+                    Thread.sleep(300)
+                }
+            }
+        }
+    }
+
     private fun receivedCurrentZoomFocus(packet: DataPacket) {
-        pointNumber.value = packet.cmd2.toInt()
         pointZoom.value = packet.data1.toInt()
-        pointFocus.value = packet.data2.toInt()
+        pointFocusForward.value = packet.data2.toInt()
+        pointFocusBack.value = packet.data2.toInt()
     }
 
     private fun receivedFixedPointsList(packet: DataPacket) {
         val point  = ZoomFocusFixedPoint(
+                packet.cmd2.toInt()/5 + 1,
                 packet.cmd2.toInt(),
                 packet.data1.toInt(),
                 packet.data2.toInt())
@@ -94,11 +121,11 @@ class StepperControlViewModel : ViewModel() {
 
     private fun sendChangePoint(command: Command) {
         createAndSendCommandBytes(command,0, 0,0)
-        readCurrentZoomFocus(Command.ReadZoomFocus)
+      //  readCurrentZoomFocus(Command.ReadZoomFocus)
     }
 
     private fun saveCurrentPoint(command: Command) {
-        createAndSendCommandBytes(command, pointNumber.value, pointZoom.value, pointFocus.value)
+        createAndSendCommandBytes(command, pointZoom.value, pointFocusForward.value, pointFocusBack.value)
     }
 
     private fun readAllPoints(command: Command) {
